@@ -11,9 +11,9 @@ on:
   workflow_dispatch:
 
 env:
-
+AZURE_FUNCTIONAPP_NAME: 'ai-demoapp' # Replace with your Function App name
 AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'  
-PYTHON_VERSION: '3.11' # set this to the python version to use (supports 3.6, 3.7, 3.8)
+PYTHON_VERSION: '3.11'
 
 jobs:
   build:
