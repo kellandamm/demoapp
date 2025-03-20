@@ -8,6 +8,7 @@
 
 /user_data
 /flask_session
+/docker
 
 # User-specific files
 *.rsuser
