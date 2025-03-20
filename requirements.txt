@@ -1,0 +1,37 @@
+# Core Flask
+flask
+werkzeug
+flask-sqlalchemy
+flask-login
+flask-session
+
+# Database
+psycopg2-binary
+sqlalchemy
+
+# Azure Services
+azure-storage-blob
+azure-cosmos
+azure-identity
+azure-keyvault-secrets
+azure-search-documents
+azure-ai-formrecognizer
+msal
+
+# AI/ML
+openai
+tiktoken
+
+# Document Processing
+python-docx
+PyPDF2
+
+# Security
+cryptography
+gunicorn
+
+# Utilities
+python-dotenv
+requests
+uuid
+timedelta

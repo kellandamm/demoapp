@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>My Documents</h1>
+    
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Upload New Document</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" action="{{ url_for('file_upload') }}">
+                <div class="mb-3">
+                    <label for="file" class="form-label">Choose File</label>
+                    <input type="file" class="form-control" id="file" name="file" required>
+                    <div class="form-text">Upload documents to search and chat with (PDF, DOCX, TXT).</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Upload Document</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Your Documents</h5>
+            <a href="{{ url_for('document_chat') }}" class="btn btn-primary">Chat with Documents</a>
+        </div>
+        <div class="card-body">
+            {% if documents %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Upload Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td>{{ doc.filename }}</td>
+                            <td>{{ doc.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>
+                                {% if doc.is_indexed %}
+                                <span class="badge bg-success">Indexed ({{ doc.chunk_count }} chunks)</span>
+                                {% else %}
+                                <span class="badge bg-warning">Processing</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('download_file', filename=doc.filename) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                    <button class="btn btn-sm btn-primary reindex-document" data-document-id="{{ doc.id }}">
+                                        <i class="bi bi-arrow-repeat"></i> Reindex
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-document" data-document-id="{{ doc.id }}" data-document-name="{{ doc.filename }}">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center my-3">No documents uploaded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Handle document deletion
+    document.querySelectorAll('.delete-document').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const documentId = this.dataset.documentId;
+            const documentName = this.dataset.documentName;
+            
+            if (confirm(`Are you sure you want to delete "${documentName}"? This will remove it from search as well.`)) {
+                fetch(`/api/documents/${documentId}/delete`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error deleting document: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting document');
+                });
+            }
+        });
+    });
+    
+    // Handle document reindexing
+    document.querySelectorAll('.reindex-document').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const documentId = this.dataset.documentId;
+            const button = this;
+            
+            // Disable button and show loading state
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reindexing...';
+            
+            fetch(`/api/documents/reindex/${documentId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error reindexing document: ' + (data.error || 'Unknown error'));
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bi bi-arrow-repeat"></i> Reindex';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error reindexing document');
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-arrow-repeat"></i> Reindex';
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

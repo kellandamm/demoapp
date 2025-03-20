@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <center><h1>Dashboard</h1></center>
+    
+    {% if current_user.is_authenticated %}
+    <div class="mb-4">
+        <br>
+        <h2>My Tools</h2>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Unified Chat Interface</h5>
+                        <p class="card-text">Chat with AI or ask questions about your documents</p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-primary">Open Chat</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">File Management</h5>
+                        <p class="card-text">Upload and manage your files</p>
+                        <a href="{{ url_for('file_upload') }}" class="btn btn-primary">Manage Files</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent conversations section -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Conversations</h5>
+                        <a href="{{ url_for('chat') }}" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_conversations %}
+                    <div class="list-group">
+                        {% for conv in recent_conversations %}
+                        <a href="{{ url_for('view_conversation', conversation_id=conv.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 text-truncate">{{ conv.title }}</h6>
+                                <small>{{ conv.timestamp }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center">No conversations yet. <a href="{{ url_for('chat') }}">Start chatting</a> now!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent files section -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Files</h5>
+                        <a href="{{ url_for('file_upload') }}" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_files %}
+                    <div class="list-group">
+                        {% for file in recent_files %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ file.name }}</h6>
+                                <small>{{ file.modified|timestamp_to_date }}</small>
+                            </div>
+                            <div>
+                                <a href="{{ url_for('download_file', filename=file.name) }}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center">No files uploaded yet. <a href="{{ url_for('file_upload') }}">Upload files</a> now!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to our Chat Application!</h1>
+        <p class="lead">This platform allows you to chat with an AI assistant and manage your files.</p>
+        <hr class="my-4">
+        <p>Please log in or register to get started.</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('login') }}" role="button">Login</a>
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('register') }}" role="button">Register</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add this function to format timestamps in JavaScript if needed
+    function formatDate(timestamp) {
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleString();
+    }
+</script>
+{% endblock %}
